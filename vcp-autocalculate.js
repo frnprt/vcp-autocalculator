@@ -3,7 +3,7 @@
 // @namespace   https://github.com/frnprt/vcp-autocalculator
 // @description Automatically computes monthly gains from VCP site
 // @match       http://www.principatumpapiae.com/scheda_euro.php
-// @version     0.5
+// @version     0.6
 // @updateURL   
 // @dowloadURL  
 // @author      frnprt
@@ -16,10 +16,10 @@
 (function() {
     'use strict';
 
-    // Compute the net money for a given month;
+    // Parses the information for a given month and return a JS object (namely, a table) with all the data;
     // @param month_number: the position of the month in the list of currently displayed months (i.e. 1,2,3 etc.), starting from 0;
     // example: if December 2023 and November 2023 are displayed in this order in "scheda_euro.php", December 2023 would be 0 and November 2023 would be 1.
-    function compute_net_for_month(month_number){
+    function parse_month(month_number){
         // Create a JSON object from the table of the financial movements of the month
         // Month number is increased by 1 to take in account the off-by-one enumeration of money movements tables in the HTML code
         var table = $(`#movimenti_${parseInt(month_number) + 1}`).tableToJSON({
@@ -30,9 +30,15 @@
         var elements_to_delete = [...Array(table.length).keys()].filter(element => element % 2 == 0);
         _.pullAt(table, elements_to_delete)
 
+        return table;
+    }
+
+    // Compute the net money for a given month;
+    // @param month_number: the JS object containing all the month info, as returned by parse_month.
+    function compute_net_for_month(month_info){
         // Compute the total sum of the movements
         var sum = 0;
-        table.forEach(element => {
+        month_info.forEach(element => {
             if (element.entrate) {
                 sum += parseFloat(element.entrate);
             } else {
@@ -70,6 +76,6 @@
     document.body.appendChild(month_selector);
 
     month_selector.addEventListener("change", (event) => {
-        sum_display.firstChild.textContent = compute_net_for_month(event.target.value);
+        sum_display.firstChild.textContent = compute_net_for_month(parse_month(event.target.value));
     });
 })();
