@@ -3,7 +3,7 @@
 // @namespace   https://github.com/frnprt/vcp-autocalculator
 // @description Automatically computes monthly gains from VCP site
 // @match       http://www.principatumpapiae.com/scheda_euro.php
-// @version     1.0
+// @version     1.0.2
 // @updateURL   https://raw.githubusercontent.com/frnprt/vcp-autocalculator/main/vcp-autocalculate.js
 // @dowloadURL  https://raw.githubusercontent.com/frnprt/vcp-autocalculator/main/vcp-autocalculate.js
 // @author      frnprt
@@ -20,7 +20,7 @@
     'use strict';
 
     // GLOBAL VARIABLES:
-    // Map containing the numbers of the months as they appear in their "header_mesi" DOM element as keys
+    // Map containing the numbers of the months (namely, digit that is the suffix in their "header_mesi" DOM element) as keys
     // and their common name as value.
     const MONTHS_MAP = initialize_months_map();
     // Substrings to use to identify influences actions:
@@ -30,7 +30,7 @@
     ];
 
 
-    // Returns a map whose keys are the number of months as they appear in their "header_mesi" DOM element and whose value is the common name of the month;
+    // Returns a map whose keys are the numbers of months as they appear in their "header_mesi" DOM element and whose value is the common name of the month;
     function initialize_months_map(){
         // Get the months' headers elements
         const months = document.querySelectorAll("tr[id^=header_mesi]");
@@ -44,33 +44,36 @@
         return months_map;
     }
 
-    // Parses the information for a given month and return a JS object (namely, a table) with all the data;
+    // Parses the information for a given month and returns a JS object (namely, a table) with all the data;
     // @param month_number: the position of the month in the list of currently displayed months (i.e. 1,2,3 etc.), starting from 0;
     // example: if December 2023 and November 2023 are displayed in this order in "scheda_euro.php", December 2023 would be 0 and November 2023 would be 1.
     function parse_month(month_number){
         // Create a JSON object from the table of the financial movements of the month
         // Month number is increased by 1 to take in account the off-by-one enumeration of money movements tables in the HTML code
+        // example: if December 2023 has an "header_mesi_0" header, its movements table will be marked as "movimenti_1"
         var table = $(`#movimenti_${parseInt(month_number) + 1}`).tableToJSON({
             headings: ['', 'data_operazione', 'entrate', 'uscite', 'erogante', 'beneficiario'],
             ignoreHiddenRows: false
         });
-        // Transpose even entries to the previous odd entry to cleanup spurious rows whose fields are filled with action descriptors (e.g. "Giustizia-Trasferimento")
+        // Transpose even entries to be a new column of the previous odd entry; 
+        // this is done to cleanup spurious rows whose fields are filled with action descriptors (e.g. "Giustizia-Trasferimento")
+        // and, at the same time, preserve the information
         var indexes_to_transpose = [...Array(table.length).keys()].filter(element => element % 2 == 0);
         table.forEach((element, index) => {
+            // The first row (index = 0) is spurious (contains the original headers parsed from the HTML table, e.g. Data Operazione);
+            // we can safely exclude it from this operation.
             if (index > 0 && indexes_to_transpose.includes(index)) {
                 table[index - 1].descrizione = element.data_operazione
             }
         });
-        // Then delete decriptors-only entries
+        // Then delete decriptors-only entries; deletion of row 0 comes for free.
         _.pullAt(table, indexes_to_transpose)
 
         return table;
     }
 
-    // Parses the information for a given array of months and return a JS object (namely, a table) with all the data;
-    // @param month_number: an array that contains the positions of the months in the list of currently displayed months (i.e. 1,2,3 etc.), starting from 0;
-    // example: if December 2023 and November 2023 are displayed in this order in "scheda_euro.php", December 2023 would be 0 and November 2023 would be 1;
-    // so if you need to parse them both, your array would contain [0, 1].
+    // Parses the information for all the months currently rendered by the HTML page;
+    // Assumes that global variable MONTHS_MAP is correctly initialized through the initialize_months_map() function.
     function parse_all_months(){
         const months_tables = [];
         MONTHS_MAP.forEach((value, key) => {
@@ -83,8 +86,8 @@
         return months_tables;
     }
 
-    // Compute the net money for a given month;
-    // @param month_number: the JS object containing all the month info, as returned by parse_month.
+    // Computes the net money for a given month;
+    // @param month_number: the JS object containing all the month info, as returned by parse_month().
     function compute_net_for_month(month_info){
         // Compute the total sum of the movements
         var sum = 0;
@@ -98,8 +101,8 @@
         return sum.toFixed(2);
     }
 
-    // Compute the net money from influences for a given month;
-    // @param month_number: the JS object containing all the month info, as returned by parse_month.
+    // Computes the net money derived from influences for a given month;
+    // @param month_number: the JS object containing all the month info, as returned by parse_month().
     function compute_influences_net_for_month(month_info){
         var sum = 0;
         month_info.forEach(element => {
@@ -118,7 +121,9 @@
         return sum.toFixed(2);
     }
 
-    function compute_echart_influences_nets(){
+    // Computes an array that contains the nets derived from influences for every month currently rendered in the HTML page.
+    // As it makes use of parse_all_months(), it assumes that global variable MONTHS_MAP is correctly initialized through the initialize_months_map() function.
+    function compute_influences_nets(){
         const months_data = parse_all_months();
         const influences_nets = [];
         months_data.forEach(element => {
@@ -127,7 +132,9 @@
         return influences_nets;
     }
 
-    function compute_echart_total_nets(){
+    // Computes an array that contains the total nets for every month currently rendered in the HTML page.
+    // As it makes use of parse_all_months(), it assumes that global variable MONTHS_MAP is correctly initialized through the initialize_months_map() function.
+    function compute_total_nets(){
         const months_data = parse_all_months();
         const nets = [];
         months_data.forEach(element => {
@@ -158,12 +165,13 @@
         expenses_chart.resize();
     });
     // Computes ECHARTS series
-    const echarts_influences_nets = compute_echart_influences_nets();
-    const echarts_total_nets = compute_echart_total_nets();
+    const echarts_influences_nets = compute_influences_nets();
+    const echarts_total_nets = compute_total_nets();
     const echarts_other_nets = echarts_total_nets.map((value, index, array) => {
-        return value - echarts_influences_nets[index];
+        return (value - echarts_influences_nets[index]).toFixed(2);
     });
 
+    // Build echarts options
     const option = {
         title: {
             text: 'Movimenti di denaro per mese'
@@ -186,6 +194,9 @@
         calculable: true,
         xAxis: [
             {
+                // Yes, reversing arrays is not exactly elegant, but I prefer to deal with it here and not during the data model building process
+                // because it would require unnecessarily complicated code to link the HTML enumeration done by the site to the "naturally ordered" one
+                // for every operation. Thanks, but no thanks.
                 type: 'category',
                 data: Array.from(MONTHS_MAP.values()).toReversed()
             }
