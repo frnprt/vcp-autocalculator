@@ -20,21 +20,29 @@
     'use strict';
 
     // GLOBAL VARIABLES:
-    // Get the months' headers elements
-    const months = document.querySelectorAll("tr[id^=header_mesi]");
-    // Build a map that associates every month displayed with the same digit key used in the other DOM tables
-    const MONTHS_MAP = new Map();
-    months.forEach(element => {
-        // Let's not make this dirty with 5 lines of JS regexp generator;
-        // KISS; change at your leisure.
-        MONTHS_MAP.set(element.id.trim().replace(/^\D+/g, ''), element.innerText.trim());
-    });
-
-    // Substring to use to identify influences actions:
+    // Map containing the numbers of the months as they appear in their "header_mesi" DOM element as keys
+    // and their common name as value.
+    const MONTHS_MAP = initialize_months_map();
+    // Substrings to use to identify influences actions:
     const INFLUENCES_DESCRIPTORS = [
         "Trasporti", "Finanza", "Giustizia", "Polizia", "Occulto",
         "Burocrazia", "Malavita", "Politica", "Media"
     ];
+
+
+    // Returns a map whose keys are the number of months as they appear in their "header_mesi" DOM element and whose value is the common name of the month;
+    function initialize_months_map(){
+        // Get the months' headers elements
+        const months = document.querySelectorAll("tr[id^=header_mesi]");
+        // Build a map that associates every month displayed with the same digit key used in the other DOM tables
+        const months_map = new Map();
+        months.forEach(element => {
+        // Let's not make this dirty with 5 lines of JS regexp generator;
+        // KISS; change at your leisure.
+            months_map.set(element.id.trim().replace(/^\D+/g, ''), element.innerText.trim());
+        });
+        return months_map;
+    }
 
     // Parses the information for a given month and return a JS object (namely, a table) with all the data;
     // @param month_number: the position of the month in the list of currently displayed months (i.e. 1,2,3 etc.), starting from 0;
@@ -128,27 +136,34 @@
         return nets;
     }
 
-    // RENDER UI ELEMENTS:
+    // RENDER UI:
+    // Create new DOM elements;
+    // create a container for the chart.
+    const chart_container = document.createElement("sum_display");
+    chart_container.style.width = "80%";
+    chart_container.style.height = "80%";
+    chart_container.style.display = "block";
+    chart_container.style.padding = "2%";
+    chart_container.style['margin-left'] = "auto";
+    chart_container.style['margin-right'] = "auto";
+    chart_container.style['margin-top'] = "auto";
+    chart_container.style['margin-bottom'] = "auto";
+    // Put the sum_display container under the reports section:
+    const place_the_chart_here = document.body.querySelector("td[align='center'][colspan='5'][valign='bottom'][height='100%']");
+    place_the_chart_here.insertBefore(chart_container, place_the_chart_here.firstChild);
 
-    // Create new DOM elements
-    const sum_display = document.createElement("sum_display");
-    sum_display.style.width = "60%";
-    sum_display.style.height = "60%";
-    sum_display.style.display = "block";
-    sum_display.style.padding = "10px";
-    sum_display.style['margin-left'] = "auto";
-    sum_display.style['margin-right'] = "auto";
-    sum_display.style['margin-top'] = "auto";
-    sum_display.style['margin-bottom'] = "auto";
-    document.body.appendChild(sum_display);
+    // Initialize ECHARTS chart
+    const expenses_chart = echarts.init(chart_container, 'dark');
+    window.addEventListener('resize', function() {
+        expenses_chart.resize();
+    });
     // Computes ECHARTS series
     const echarts_influences_nets = compute_echart_influences_nets();
     const echarts_total_nets = compute_echart_total_nets();
     const echarts_other_nets = echarts_total_nets.map((value, index, array) => {
         return value - echarts_influences_nets[index];
     });
-    // Initialize ECHARTS chart
-    const expenses_chart = echarts.init(sum_display, 'dark');
+
     const option = {
         title: {
             text: 'Movimenti di denaro per mese'
