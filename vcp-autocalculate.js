@@ -155,7 +155,7 @@
     chart_container.style['margin-right'] = "auto";
     chart_container.style['margin-top'] = "auto";
     chart_container.style['margin-bottom'] = "auto";
-    // Put the sum_display container under the reports section:
+    // Put the container under the reports section:
     const place_the_chart_here = document.body.querySelector("td[align='center'][colspan='5'][valign='bottom'][height='100%']");
     place_the_chart_here.insertBefore(chart_container, place_the_chart_here.firstChild);
 
