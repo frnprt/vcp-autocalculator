@@ -23,10 +23,13 @@
     // Map containing the numbers of the months (namely, digit that is the suffix in their "header_mesi" DOM element) as keys
     // and their common name as value.
     const MONTHS_MAP = initialize_months_map();
-    // Substrings to use to identify influences actions:
+    // Substrings to use to identify influences actions;
+    // "Strada-" and "Finanza-" have the "-" suffix to differentiate them from the
+    // omonimous income from skills.
     const INFLUENCES_DESCRIPTORS = [
-        "Trasporti", "Finanza", "Giustizia", "Polizia", "Occulto",
-        "Burocrazia", "Malavita", "Politica", "Media"
+        "Trasporti", "Finanza-", "Giustizia", "Polizia", "Occulto",
+        "Burocrazia", "Malavita", "Politica", "Media", "Industria",
+        "Strada-"
     ];
 
     // 
