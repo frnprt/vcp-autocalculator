@@ -29,8 +29,11 @@
         "Burocrazia", "Malavita", "Politica", "Media"
     ];
 
-
-    // Returns a map whose keys are the numbers of months as they appear in their "header_mesi" DOM element and whose value is the common name of the month;
+    // 
+    /**
+     * Parses all the "header_mesi" headers to build a map of months.
+     * @returns a map whose keys are the numbers of months as they appear in their "header_mesi" DOM element and whose value is the common name of the month;
+     */
     function initialize_months_map(){
         // Get the months' headers elements
         const months = document.querySelectorAll("tr[id^=header_mesi]");
@@ -44,9 +47,12 @@
         return months_map;
     }
 
-    // Parses the information for a given month and returns a JS object (namely, a table) with all the data;
-    // @param month_number: the position of the month in the list of currently displayed months (i.e. 1,2,3 etc.), starting from 0;
-    // example: if December 2023 and November 2023 are displayed in this order in "scheda_euro.php", December 2023 would be 0 and November 2023 would be 1.
+    /**
+     * Parses the information for a given month.
+     * @param {*} month_number the position of the month in the list of currently displayed months (i.e. 1,2,3 etc.), starting from 0;
+     * example: if December 2023 and November 2023 are displayed in this order in "scheda_euro.php", December 2023 would be 0 and November 2023 would be 1.
+     * @returns a JS object (namely, a table) with all the data, where every position is a row and every row contains a map representing the values of the cells
+     */
     function parse_month(month_number){
         // Create a JSON object from the table of the financial movements of the month
         // Month number is increased by 1 to take in account the off-by-one enumeration of money movements tables in the HTML code
@@ -72,8 +78,12 @@
         return table;
     }
 
-    // Parses the information for all the months currently rendered by the HTML page;
-    // Assumes that global variable MONTHS_MAP is correctly initialized through the initialize_months_map() function.
+    /**
+     * Parses the information for all the months currently rendered by the HTML page;
+     * Assumes that global variable MONTHS_MAP is correctly initialized through the initialize_months_map() function.
+     * @returns an array with the data from all months, where every position is a month and every row contains a representation of the month as returned by
+     * parse_month() function, plus an id and its common name.
+     */
     function parse_all_months(){
         const months_tables = [];
         MONTHS_MAP.forEach((value, key) => {
@@ -86,8 +96,11 @@
         return months_tables;
     }
 
-    // Computes the net money for a given month;
-    // @param month_number: the JS object containing all the month info, as returned by parse_month().
+    /**
+     * Computes the net money for a given month;
+     * @param {*} month_info the JS object containing all the month info, as returned by parse_month().
+     * @returns a floating point number that represents the total net money for a given month.
+     */
     function compute_net_for_month(month_info){
         // Compute the total sum of the movements
         var sum = 0;
@@ -101,8 +114,11 @@
         return sum.toFixed(2);
     }
 
-    // Computes the net money derived from influences for a given month;
-    // @param month_number: the JS object containing all the month info, as returned by parse_month().
+    /**
+     * Computes the net money derived from influences for a given month;
+     * @param {*} month_info the JS object containing all the month info, as returned by parse_month().
+     * @returns a floating point number that represents the net money derived from influences for a given month.
+     */
     function compute_influences_net_for_month(month_info){
         var sum = 0;
         month_info.forEach(element => {
@@ -121,8 +137,11 @@
         return sum.toFixed(2);
     }
 
-    // Computes an array that contains the nets derived from influences for every month currently rendered in the HTML page.
-    // As it makes use of parse_all_months(), it assumes that global variable MONTHS_MAP is correctly initialized through the initialize_months_map() function.
+    /**
+     * Computes an array that contains the nets derived from influences for every month currently rendered in the HTML page.
+     * As it makes use of parse_all_months(), it assumes that global variable MONTHS_MAP is correctly initialized through the initialize_months_map() function.
+     * @returns an array where every position is the net derived from influences of the months, as ordered in the HTML page (from top to bottom).
+     */
     function compute_influences_nets(){
         const months_data = parse_all_months();
         const influences_nets = [];
@@ -132,8 +151,11 @@
         return influences_nets;
     }
 
-    // Computes an array that contains the total nets for every month currently rendered in the HTML page.
-    // As it makes use of parse_all_months(), it assumes that global variable MONTHS_MAP is correctly initialized through the initialize_months_map() function.
+    /**
+     * Computes an array that contains the total net for every month currently rendered in the HTML page.
+     * As it makes use of parse_all_months(), it assumes that global variable MONTHS_MAP is correctly initialized through the initialize_months_map() function.
+     * @returns an array where every position is the total net of the months, as ordered in the HTML page (from top to bottom).
+     */
     function compute_total_nets(){
         const months_data = parse_all_months();
         const nets = [];
@@ -159,12 +181,12 @@
     const place_the_chart_here = document.body.querySelector("td[align='center'][colspan='5'][valign='bottom'][height='100%']");
     place_the_chart_here.insertBefore(chart_container, place_the_chart_here.firstChild);
 
-    // Initialize ECHARTS chart
+    // Initialize echarts chart
     const expenses_chart = echarts.init(chart_container, 'dark');
     window.addEventListener('resize', function() {
         expenses_chart.resize();
     });
-    // Computes ECHARTS series
+    // Computes echarts series
     const echarts_influences_nets = compute_influences_nets();
     const echarts_total_nets = compute_total_nets();
     const echarts_other_nets = echarts_total_nets.map((value, index, array) => {
