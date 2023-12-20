@@ -21,7 +21,7 @@
 
     // GLOBAL VARIABLES:
     // Map containing the numbers of the months (namely, digit that is the suffix in their "header_mesi" DOM element) as keys
-    // and their common name as value.
+    // and their common name as value. The same order of the displayed HTML page (top to bottom) is preserved.
     const MONTHS_MAP = initialize_months_map();
     // Substrings to use to identify influences actions;
     // "Strada-" and "Finanza-" have the "-" suffix to differentiate them from the
@@ -29,7 +29,7 @@
     const INFLUENCES_DESCRIPTORS = [
         "Trasporti", "Finanza-", "Giustizia", "Polizia", "Occulto",
         "Burocrazia", "Malavita", "Politica", "Media", "Industria",
-        "Strada-"
+        "Strada-", "Università", "Alta Società"
     ];
 
     // 
