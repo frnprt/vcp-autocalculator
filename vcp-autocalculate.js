@@ -3,7 +3,7 @@
 // @namespace   https://github.com/frnprt/vcp-autocalculator
 // @description Automatically computes monthly gains from VCP site
 // @match       http://www.principatumpapiae.com/scheda_euro.php
-// @version     1.0.4.1
+// @version     1.0.5
 // @updateURL   https://raw.githubusercontent.com/frnprt/vcp-autocalculator/main/vcp-autocalculate.js
 // @downloadURL https://raw.githubusercontent.com/frnprt/vcp-autocalculator/main/vcp-autocalculate.js
 // @author      frnprt
@@ -13,8 +13,6 @@
 // @require     https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js#sha256-qXBd/EfAdjOA2FGrGAG+b3YBn2tn5A6bhz+LSgYD96k=
 // @require     https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js#sha256-EVZCmhajjLhgTcxlGMGUBtQiYULZCPjt0uNTFEPFTRk=
 // ==/UserScript==
-
-// TODO: Refactor compute_nets with Strategy pattern to avoid code redundancy
 
 (function() {
     'use strict';
@@ -167,45 +165,17 @@
     }
 
     /**
-     * Computes an array that contains the nets derived from influences for every month currently rendered in the HTML page.
+     * Computes an array that contains data based on the selected strategy for every month currently rendered in the HTML page.
      * As it makes use of parse_all_months(), it assumes that global variable MONTHS_MAP is correctly initialized through the initialize_months_map() function.
      * @returns an array where every position is the net derived from influences of the months, as ordered in the HTML page (from top to bottom).
      */
-    function compute_influences_nets(){
+    function compute_months_money_data(strategy){
         const months_data = parse_all_months();
-        const influences_nets = [];
+        const data = [];
         months_data.forEach(element => {
-            influences_nets.push(compute_influences_net_for_month(element.data));
+            data.push(strategy(element.data));
         });
-        return influences_nets;
-    }
-
-    /**
-     * Computes an array that contains the money derived from passive influences for every month currently rendered in the HTML page.
-     * As it makes use of parse_all_months(), it assumes that global variable MONTHS_MAP is correctly initialized through the initialize_months_map() function.
-     * @returns an array where every position is the net derived from influences of the months, as ordered in the HTML page (from top to bottom).
-     */
-    function compute_influences_passive_incomes(){
-        const months_data = parse_all_months();
-        const influences_nets = [];
-        months_data.forEach(element => {
-            influences_nets.push(compute_influences_passive_income_for_month(element.data));
-        });
-        return influences_nets;
-    }
-
-    /**
-     * Computes an array that contains the total net for every month currently rendered in the HTML page.
-     * As it makes use of parse_all_months(), it assumes that global variable MONTHS_MAP is correctly initialized through the initialize_months_map() function.
-     * @returns an array where every position is the total net of the months, as ordered in the HTML page (from top to bottom).
-     */
-    function compute_total_nets(){
-        const months_data = parse_all_months();
-        const nets = [];
-        months_data.forEach(element => {
-            nets.push(compute_net_for_month(element.data));
-        });
-        return nets;
+        return data;
     }
 
     // RENDER UI:
@@ -230,9 +200,9 @@
         expenses_chart.resize();
     });
     // Computes echarts series
-    const echarts_influences_nets = compute_influences_nets();
-    const echarts_total_nets = compute_total_nets();
-    const echarts_passive_income = compute_influences_passive_incomes();
+    const echarts_influences_nets = compute_months_money_data(compute_influences_net_for_month);
+    const echarts_total_nets = compute_months_money_data(compute_net_for_month);
+    const echarts_passive_income = compute_months_money_data(compute_influences_passive_income_for_month);
     const echarts_other_nets = echarts_total_nets.map((value, index, array) => {
         return (value - echarts_influences_nets[index]).toFixed(2);
     });
