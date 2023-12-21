@@ -205,7 +205,8 @@
             trigger: 'axis'
         },
         legend: {
-            data: ['Netto delle influenze', 'Netto altre operazioni', 'Netto totale']
+            data: ['Netto delle influenze', 'Netto altre operazioni', 'Netto totale'],
+            bottom: '3%'
         },
         toolbox: {
             show: true,
