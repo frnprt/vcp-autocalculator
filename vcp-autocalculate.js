@@ -5,7 +5,7 @@
 // @match       http://www.principatumpapiae.com/scheda_euro.php
 // @version     1.0.2
 // @updateURL   https://raw.githubusercontent.com/frnprt/vcp-autocalculator/main/vcp-autocalculate.js
-// @dowloadURL  https://raw.githubusercontent.com/frnprt/vcp-autocalculator/main/vcp-autocalculate.js
+// @downloadURL https://raw.githubusercontent.com/frnprt/vcp-autocalculator/main/vcp-autocalculate.js
 // @author      frnprt
 // @grant       none
 // @require     https://code.jquery.com/jquery-3.7.1.min.js#sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=
