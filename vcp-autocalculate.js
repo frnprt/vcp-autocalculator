@@ -3,7 +3,7 @@
 // @namespace   https://github.com/frnprt/vcp-autocalculator
 // @description Automatically computes monthly gains from VCP site
 // @match       http://www.principatumpapiae.com/scheda_euro.php
-// @version     1.0.4
+// @version     1.0.4.1
 // @updateURL   https://raw.githubusercontent.com/frnprt/vcp-autocalculator/main/vcp-autocalculate.js
 // @downloadURL https://raw.githubusercontent.com/frnprt/vcp-autocalculator/main/vcp-autocalculate.js
 // @author      frnprt
@@ -246,7 +246,7 @@
             trigger: 'axis'
         },
         legend: {
-            data: ['Netto delle influenze', 'Netto altre operazioni', 'Netto totale'],
+            data: ['Entrate influenze in passiva', 'Netto delle influenze', 'Netto altre operazioni', 'Netto totale'],
             bottom: '3%'
         },
         toolbox: {
