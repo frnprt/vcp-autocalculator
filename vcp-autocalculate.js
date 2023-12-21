@@ -3,7 +3,7 @@
 // @namespace   https://github.com/frnprt/vcp-autocalculator
 // @description Automatically computes monthly gains from VCP site
 // @match       http://www.principatumpapiae.com/scheda_euro.php
-// @version     1.0.2
+// @version     1.0.3
 // @updateURL   https://raw.githubusercontent.com/frnprt/vcp-autocalculator/main/vcp-autocalculate.js
 // @downloadURL https://raw.githubusercontent.com/frnprt/vcp-autocalculator/main/vcp-autocalculate.js
 // @author      frnprt
