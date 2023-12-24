@@ -3,7 +3,7 @@
 // @namespace   https://github.com/frnprt/vcp-autocalculator
 // @description Automatically computes monthly gains from VCP site
 // @match       http://www.principatumpapiae.com/scheda_euro.php
-// @version     1.0.5.1
+// @version     1.0.5.2
 // @updateURL   https://raw.githubusercontent.com/frnprt/vcp-autocalculator/main/vcp-autocalculate.js
 // @downloadURL https://raw.githubusercontent.com/frnprt/vcp-autocalculator/main/vcp-autocalculate.js
 // @author      frnprt
@@ -61,14 +61,14 @@
         // Create a JSON object from the table of the financial movements of the month
         // Month number is increased by 1 to take in account the off-by-one enumeration of money movements tables in the HTML code
         // example: if December 2023 has an "header_mesi_0" header, its movements table will be marked as "movimenti_1"
-        var table = $(`#movimenti_${parseInt(month_number) + 1}`).tableToJSON({
+        const table = $(`#movimenti_${parseInt(month_number) + 1}`).tableToJSON({
             headings: ['', 'data_operazione', 'entrate', 'uscite', 'erogante', 'beneficiario'],
             ignoreHiddenRows: false
         });
         // Transpose even entries to be a new column of the previous odd entry; 
         // this is done to cleanup spurious rows whose fields are filled with action descriptors (e.g. "Giustizia-Trasferimento")
         // and, at the same time, preserve the information
-        var indexes_to_transpose = [...Array(table.length).keys()].filter(element => element % 2 == 0);
+        const indexes_to_transpose = [...Array(table.length).keys()].filter(element => element % 2 == 0);
         table.forEach((element, index) => {
             // The first row (index = 0) is spurious (contains the original headers parsed from the HTML table, e.g. Data Operazione);
             // we can safely exclude it from this operation.
@@ -107,7 +107,7 @@
      */
     function compute_net_for_month(month_info){
         // Compute the total sum of the movements
-        var sum = 0;
+        let sum = 0;
         month_info.forEach(element => {
             if (element.entrate) {
                 sum += parseFloat(element.entrate);
@@ -124,7 +124,7 @@
      * @returns a floating point number that represents the net money derived from influences for a given month.
      */
     function compute_influences_net_for_month(month_info){
-        var sum = 0;
+        let sum = 0;
         month_info.forEach(element => {
             if (INFLUENCES_DESCRIPTORS.some(descriptor => element.descrizione
                                             .toLowerCase()
@@ -147,7 +147,7 @@
      * @returns a floating point number that represents the net money derived from influences for a given month.
      */
     function compute_influences_passive_income_for_month(month_info){
-        var sum = 0;
+        let sum = 0;
         month_info.forEach(element => {
             if (PASSIVE_DESCRIPTORS.some(descriptor => element.descrizione
                                             .toLowerCase()
